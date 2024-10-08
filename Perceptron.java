@@ -1,3 +1,3 @@
-class Perceptron {
-  
+public class Perceptron {
+
 }
