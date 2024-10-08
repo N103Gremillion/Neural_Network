@@ -1,3 +1,5 @@
 *******This is just a log of sources and steps I took to create this **********
 
 - dowloaded java
+
+- setup matrix class and tested dot/add funcs
