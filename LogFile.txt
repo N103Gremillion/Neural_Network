@@ -4,8 +4,9 @@
 
 - setup matrix class and tested dot/add funcs
 
-- watched some youtube videos to refress myself on what I was doing
+- watched some youtube videos to refresh myself on what I was doing
 	https://www.youtube.com/watch?v=aircAruvnKk
 	https://www.youtube.com/watch?v=4Gac5I64LM
 
 - looked back at perceptron notes and setup the perceptron class (basic implementation with wieghts inputs and biases)
+- started messing with the neuralNetwork calss

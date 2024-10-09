@@ -16,4 +16,9 @@ class Main {
         System.out.println("Activation Value: " + perceptron.activationValue);
 
     }
+
+    // function to setup and test the inputs/weights/biases in the excel file (kinda the entry point for main to reference)
+    void setupNetwork(){
+    
+    }
 }
