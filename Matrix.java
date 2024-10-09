@@ -22,6 +22,21 @@ class Matrix {
     /**
      * ***************Methods*****************
      */
+    public void fillMatrix(float[][] values){
+
+        if (this.rowSize != values.length || this.columnSize != values[0].length){
+            return;
+        }
+
+        int cols = values[0].length;
+
+        for (int i = 0; i < values.length; i++){
+            for (int j = 0; j < cols; j++){
+                this.grid[i][j] = values[i][j];
+            }
+        }
+    }
+
     // add matricies
     public Matrix addMatrices(Matrix matrix) {
 
