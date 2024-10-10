@@ -33,7 +33,7 @@ public class Perceptron {
 
   float findZvalue(){
     // this should always be a 1x1 matrix sice this is a single perceptron
-    Matrix weightedSumMatrix = this.inputValues.dotProductMatrices(this.inputWeights);
+    Matrix weightedSumMatrix = this.inputWeights.dotProductMatrices(this.inputValues);
     float weightedSum = weightedSumMatrix.grid[0][0];
 
     return (weightedSum + this.bias);
