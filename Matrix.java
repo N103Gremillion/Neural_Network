@@ -93,4 +93,23 @@ class Matrix {
 
     }
 
+    public Matrix hadamardProduct(Matrix matrix2){
+
+        if (this.rowSize != matrix2.rowSize || this.columnSize != matrix2.columnSize) {
+            return null;
+        }
+
+        Matrix resultingMatrix = new Matrix(this.rowSize, this.columnSize);
+
+        for (int row = 0; row < this.rowSize; row++) {
+            for (int column = 0; column < this.columnSize; column++) {
+
+                float resultingData = this.grid[row][column] * matrix2.grid[row][column];
+                resultingMatrix.grid[row][column] = resultingData;
+
+            }
+        }
+        return resultingMatrix;
+    }
+
 }
