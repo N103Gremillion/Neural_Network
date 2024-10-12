@@ -1,4 +1,3 @@
-
 /** ********************* class to represent a matrix ********************* */
 class Matrix {
 
@@ -10,32 +9,26 @@ class Matrix {
     /**
      * *Constructor**
      */
-    public Matrix(int rowSize, int columnSize) {
+    public Matrix(float[][] inputValues) {
+        if (inputValues == null || inputValues.length == 0 || inputValues[0].length == 0) {
+            System.out.println("invalid input values");
+        }
 
-        // definitions
-        this.rowSize = rowSize;
-        this.columnSize = columnSize;
+        this.rowSize = inputValues.length;
+        this.columnSize = inputValues[0].length;
+        
+        // Deep copy of inputValues to avoid external modifications affecting the grid
         this.grid = new float[rowSize][columnSize];
-
+        for (int i = 0; i < rowSize; i++) {
+            for (int j = 0; j < columnSize; j++){
+                grid[i][j] = inputValues[i][j];
+            }
+        }
     }
 
     /**
      * ***************Methods*****************
      */
-    public void fillMatrix(float[][] values){
-
-        if (this.rowSize != values.length || this.columnSize != values[0].length){
-            return;
-        }
-
-        int cols = values[0].length;
-
-        for (int i = 0; i < values.length; i++){
-            for (int j = 0; j < cols; j++){
-                this.grid[i][j] = values[i][j];
-            }
-        }
-    }
 
     // add matricies
     public Matrix addMatrices(Matrix matrix) {
@@ -45,16 +38,19 @@ class Matrix {
             return null;
         }
 
-        Matrix resultingMatrix = new Matrix(this.rowSize, this.columnSize);
+        float[][] resultingValues = new float[this.rowSize][this.columnSize];
 
         for (int row = 0; row < this.rowSize; row++) {
             for (int column = 0; column < this.columnSize; column++) {
 
                 float resultingData = this.grid[row][column] + matrix.grid[row][column];
-                resultingMatrix.grid[row][column] = resultingData;
+                resultingValues[row][column] = resultingData;
 
             }
         }
+
+        Matrix resultingMatrix = new Matrix(resultingValues);
+
         return resultingMatrix;
     }
 
@@ -66,7 +62,7 @@ class Matrix {
             return null;
         }
 
-        Matrix resultingMatrix = new Matrix(this.rowSize, matrix2.columnSize);
+        float[][] resultingValues = new float[this.rowSize][matrix2.columnSize];
 
         for (int m1row = 0; m1row < this.rowSize; m1row++) {
 
@@ -81,13 +77,14 @@ class Matrix {
                     float curM1val = this.grid[m1row][m1col];
                     float curM2val = matrix2.grid[m1col][m2col];
                     rowColumnDottedData += (curM1val * curM2val);
-
                 }
 
-                resultingMatrix.grid[m1row][m2col] = rowColumnDottedData;
+                resultingValues[m1row][m2col] = rowColumnDottedData;
 
             }
         }
+
+        Matrix resultingMatrix = new Matrix(resultingValues);
 
         return resultingMatrix;
 
@@ -99,17 +96,32 @@ class Matrix {
             return null;
         }
 
-        Matrix resultingMatrix = new Matrix(this.rowSize, this.columnSize);
+        float[][] resultingValues = new float[this.rowSize][this.columnSize];
 
         for (int row = 0; row < this.rowSize; row++) {
             for (int column = 0; column < this.columnSize; column++) {
 
                 float resultingData = this.grid[row][column] * matrix2.grid[row][column];
-                resultingMatrix.grid[row][column] = resultingData;
+                resultingValues[row][column] = resultingData;
 
             }
         }
+
+        Matrix resultingMatrix = new Matrix(resultingValues);
+
         return resultingMatrix;
+    }
+
+    public void printMatrix(){
+
+        System.out.println("The Values for this Matrix are \n ****************************************");
+
+        for (int i = 0; i < this.rowSize; i++){
+            for (int j = 0; j < this.columnSize; j++){
+                System.out.print(this.grid[i][j] + ", ");
+            }
+            System.out.println();
+        }
     }
 
 }

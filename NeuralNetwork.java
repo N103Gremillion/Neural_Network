@@ -1,19 +1,21 @@
-class NeuralNetwork {
+public class NeuralNetwork {
 
-  int totalLayers;
-  Perceptron[][] network;
-  float learningRate;
+  Layer[] layers;
+  int size;
 
-  public NeuralNetwork(int totalLayers, float learningRate, int[] columnSizes){
-
-    this.totalLayers = totalLayers;
-    this.learningRate = learningRate;
-    // use a jagged array since not all layers will have the same size
-    this.network = new Perceptron[totalLayers][];
-    // initalize the column size of each row
-    for (int i = 0; i < columnSizes.length; i++){
-      this.network[i] = new Perceptron[columnSizes[i]];
+  // initalize the 1st layer of a neural network
+  public NeuralNetwork(float[][] inputs, int layer, int size) {
+    if (size == 0){
+      return;
     }
+    this.size = size;
+    this.layers = new Layer[size];
+    layers[0] = new Layer(inputs, layer);
+  }
+
+  // setup the next layer of the network 
+  public void forwardPass (Matrix inputs, Matrix weights, Matrix biases, int layer) {
+    layers[layer] = new Layer(inputs, weights, biases, layer);
   }
 
 }
