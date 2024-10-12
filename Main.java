@@ -14,7 +14,7 @@ class Main {
         //******************* for training case # 1 *************
         int case1totalLayers = 3;
         float[][] layer0Input = {{0}, {1}, {0}, {1}};
-        float[][] layer0ExpectedOutput = {{1}, {0}};
+        float[][] case1ExpectedOutput = {{0}, {1}};
 
         //weights
         float[][] layer1Weights = {
@@ -33,17 +33,19 @@ class Main {
 
         // initiate the startingLayer
         NeuralNetwork network1 = new NeuralNetwork(layer0Input, 0, case1totalLayers);
-        System.out.println("\nActivations for Layer 0");
+        System.out.println("\n*************************Case 1****************************");
         network1.layers[0].activationValues.printMatrix();
         
         // 1st forward pass
         network1.forwardPass(network1.layers[0].activationValues, new Matrix(layer1Weights), new Matrix(layer1Biases), 1); 
-        System.out.println("\nActivations for Layer 1");
-        network1.layers[1].activationValues.printMatrix();
 
         // 2nd forward pass
         network1.forwardPass(network1.layers[1].activationValues, new Matrix(layer2Weights), new Matrix(layer2Biases), 2); 
-        System.out.println("\nActivations for Layer 2");
-        network1.layers[2].activationValues.printMatrix();
+
+        // start back propogation
+        for (int curLayer = case1totalLayers; curLayer > 1; curLayer--){
+            network1.backwardPropogate(new Matrix(case1ExpectedOutput), curLayer);
+        }
+
     }
 }

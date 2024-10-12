@@ -6,6 +6,8 @@ public class Layer {
   Matrix zValues;
   Matrix weights;
   Matrix biases;
+  Matrix biasGradient;
+  Matrix weightGradient;
   int layer;
 
   // only for the opening layer
@@ -48,5 +50,60 @@ public class Layer {
     Matrix result = new Matrix(resultingValues);
 
     return result;
-  } 
+  }
+  
+  public void calculateBiasGradientForFinalLayer(Matrix expectedOutputs){
+
+    Matrix subExpecteds = activationValues.subtractMatrices(expectedOutputs);
+    
+    // create the appropriatly sized matrix of 1's
+    float[][] ones = new float[activationValues.rowSize][activationValues.columnSize];
+
+    for (int i = 0; i < activationValues.rowSize; i++){
+      for (int j = 0; j < activationValues.columnSize; j++){
+        ones[i][j] = 1f;
+      }
+    }
+
+    Matrix matrixOf1s = new Matrix(ones);
+    Matrix onesMinusActivations = matrixOf1s.subtractMatrices(activationValues);
+    Matrix hadamarOfRight = activationValues.hadamardProduct(onesMinusActivations);
+    Matrix result = subExpecteds.hadamardProduct(hadamarOfRight);
+
+    biasGradient = result;
+  }
+
+  // Note: (biaseGradient /  of right)
+  public void calculateBiasGradient(Matrix weightsOfRight, Matrix biasesGradientOfRight){
+
+    // this represent the (Weights of l + 1 dotted with the biasGradient of l + 1)
+    Matrix rightWeightsTranspose = weightsOfRight.transposeMatrix();
+    Matrix dottedWeightsBiasGradientsOfRight = rightWeightsTranspose.dotProductMatrices(biasesGradientOfRight);
+
+    float[][] ones = new float[activationValues.rowSize][activationValues.columnSize];
+
+    for (int i = 0; i < activationValues.rowSize; i++){
+      for (int j = 0; j < activationValues.columnSize; j++){
+        ones[i][j] = 1f;
+      }
+    }
+
+    Matrix matrixOf1s = new Matrix(ones);
+    Matrix onesMinusActivations = matrixOf1s.subtractMatrices(this.activationValues);
+    // this is (actiavtionMatrix) hadamarded (1's matrix - activationMatrix)
+    Matrix rightSizeOfBiasGradientEquation = activationValues.hadamardProduct(onesMinusActivations);
+    Matrix result = dottedWeightsBiasGradientsOfRight.hadamardProduct(rightSizeOfBiasGradientEquation);
+
+    biasGradient = result;
+  }
+
+  public void calculateWeightGradient(Matrix activationsLeft){
+
+    Matrix activationTranspose = activationsLeft.transposeMatrix();
+    Matrix result = biasGradient.dotProductMatrices(activationTranspose);
+    weightGradient = result;
+    // weightGradient.printMatrix();
+
+  }
+
 }

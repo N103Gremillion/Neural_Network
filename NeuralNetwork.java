@@ -18,4 +18,16 @@ public class NeuralNetwork {
     layers[layer] = new Layer(inputs, weights, biases, layer);
   }
 
+  // formula for the final layer 
+  public void backwardPropogate(Matrix expectedOutputs, int layer) {
+    // get the error 
+    if (layer == this.size){
+      layers[layer - 1].calculateBiasGradientForFinalLayer(expectedOutputs);
+    }
+    else{
+      layers[layer - 1].calculateBiasGradient(layers[layer].weights, layers[layer].biasGradient);
+    }
+    layers[layer - 1].calculateWeightGradient(layers[layer - 2].activationValues);
+  }
+
 }
