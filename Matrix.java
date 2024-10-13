@@ -148,6 +148,21 @@ class Matrix {
         return new Matrix(result);
     }
 
+    public Matrix scalarMultiply(float scalarValue){
+
+        float[][] scaledGrid = new float[rowSize][columnSize];
+
+        for (int i = 0; i < rowSize; i++){
+            for (int j = 0; j < columnSize; j++){
+                scaledGrid[i][j] = (grid[i][j] * scalarValue);
+            }
+        }
+
+        Matrix result = new Matrix(scaledGrid);
+
+        return result;
+    }
+
     public void printMatrix(){
 
         System.out.println("****************************************");
