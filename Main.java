@@ -11,9 +11,11 @@ class Main {
 
         int learningRate = 10;
 
+        //********************************Epoc 1***************************************** */
+
         //******************* for training case # 1 *************
         int case1totalLayers = 3;
-        float[][] layer0Input = {{0}, {1}, {0}, {1}};
+        float[][] layer0InputCase1 = {{0}, {1}, {0}, {1}};
         float[][] case1ExpectedOutput = {{0}, {1}};
 
         //weights
@@ -32,9 +34,8 @@ class Main {
         float[][] layer2Biases = {{0.16f}, {-0.46f}};
 
         // initiate the startingLayer
-        NeuralNetwork network1 = new NeuralNetwork(layer0Input, 0, case1totalLayers);
+        NeuralNetwork network1 = new NeuralNetwork(layer0InputCase1, 0, case1totalLayers);
         System.out.println("\n*************************Case 1****************************");
-        network1.layers[0].activationValues.printMatrix();
         
         // 1st forward pass
         network1.forwardPass(network1.layers[0].activationValues, new Matrix(layer1Weights), new Matrix(layer1Biases), 1); 
@@ -42,10 +43,28 @@ class Main {
         // 2nd forward pass
         network1.forwardPass(network1.layers[1].activationValues, new Matrix(layer2Weights), new Matrix(layer2Biases), 2); 
 
-        // start back propogation
+        // back propogation
         for (int curLayer = case1totalLayers; curLayer > 1; curLayer--){
             network1.backwardPropogate(new Matrix(case1ExpectedOutput), curLayer);
         }
+       
+        /**********************training case # 2***************************/
+        int case2totalLayers = 3;
+        float[][] layer0InputCase2 = {{1}, {0}, {1}, {0}};
+        float[][] case2ExpectedOutput = {{1}, {0}};
+
+        // initiate the startingLayer
+        NeuralNetwork network2 = new NeuralNetwork(layer0InputCase2, 0, case2totalLayers);
+        
+        // 1st forward pass
+        network2.forwardPass(network2.layers[0].activationValues, new Matrix(layer1Weights), new Matrix(layer1Biases), 1); 
+        network2.forwardPass(network2.layers[1].activationValues, new Matrix(layer2Weights), new Matrix(layer2Biases), 2);
+        
+        for (int curLayer = case1totalLayers; curLayer > 1; curLayer--){
+            network2.backwardPropogate(new Matrix(case2ExpectedOutput), curLayer);
+        }
+
+        /***********************adjust the weights after case 1 and 2********************************/ 
 
     }
 }

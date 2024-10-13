@@ -102,7 +102,6 @@ public class Layer {
     Matrix activationTranspose = activationsLeft.transposeMatrix();
     Matrix result = biasGradient.dotProductMatrices(activationTranspose);
     weightGradient = result;
-    // weightGradient.printMatrix();
 
   }
 
