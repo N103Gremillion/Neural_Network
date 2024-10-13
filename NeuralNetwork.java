@@ -2,6 +2,7 @@ public class NeuralNetwork {
 
   Layer[] layers;
   int size;
+  int learningRate;
 
   // initalize the 1st layer of a neural network
   public NeuralNetwork(float[][] inputs, int layer, int size) {
