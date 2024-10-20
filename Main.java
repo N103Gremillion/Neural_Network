@@ -10,14 +10,14 @@ class Main {
 
     public static void main(String args[]) {
 
-        setupInitialWeights();
-        setupInitialBiases();
-        runEpoch(1);
-        runEpoch(2);
-        runEpoch(3);
-        runEpoch(4);
-        runEpoch(5);
-        runEpoch(6);
+        // setupInitialWeights();
+        // setupInitialBiases();
+        // runEpoch(1);
+        // runEpoch(2);
+        // runEpoch(3);
+        // runEpoch(4);
+        // runEpoch(5);
+        // runEpoch(6);
         
     }
 

@@ -12,30 +12,26 @@ public class CSVreader {
     this.filePath = filePath;
   }
 
-  public static String readCSV(String csvPath) throws IOException {
+  public String readCSV() {
+    StringBuilder fileContents = new StringBuilder();
 
-        // formating the input using a string builder
-        StringBuilder fileContents = new StringBuilder();
-        BufferedReader reader = null;
+    // try to read current filePath file
+    try (BufferedReader reader = new BufferedReader(new FileReader(this.filePath))) {
+      String line;
 
-        try {
-          reader = new BufferedReader(new FileReader(csvPath));
-          String line;
-          int curLIneIndex = 0;
-
-          // while there is a line to read from
-          while ((line = reader.readLine()) != null){
-              fileContents.append(line);
-              fileContents.append('\n');
-              curLIneIndex++;
-          }
-        }
-        catch (IOException error) {
-            error.printStackTrace();
-        }
-        finally {
-          reader.close();
-        }
-        return fileContents.toString();
+      // While there is a line to read from
+      while ((line = reader.readLine()) != null) {
+        fileContents.append(line);
+        fileContents.append('\n');
+      }
     }
+
+    catch (IOException error) {
+      error.printStackTrace();
+    }
+
+    return fileContents.toString();
+    
+  }
+
 }
