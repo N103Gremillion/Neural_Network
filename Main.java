@@ -1,23 +1,29 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Random;
 
 class Main {
 
+    static int learningRate = 3;
+    static int totalLayers = 3;
+    static int totalEpochs = 30;
+    static int miniBatchSize = 10;
+    static int inputLinesSize = 785;
     static double[][] layer1weights;
     static double[][] layer2weights;
     static double[][] layer1biases;
     static double[][] layer2biases;
-    static int learningRate = 10;
-    static int totalLayers = 3;
-
+    // this will hold all the csv data in a readable format for my setup
+    static NeuralNetwork[][] trainingNetworks = new NeuralNetwork[totalEpochs][miniBatchSize];
+    // this corresponds to the trainingNetworks and has the expected values using the label of the 1st value in each csv row
+    static Matrix[][] expectedOutputsOfTrainingNetworks = new Matrix[totalEpochs][miniBatchSize];
+    
     public static void main(String args[]) {
-        
-        // CSVreader csv = new CSVreader("mnist_train.csv");
+
+        readCSV("mnist_train.csv");
         setupInitialWeightsAndBiases();
-        new Matrix(layer1weights).printMatrix();
-        new Matrix(layer2weights).printMatrix();
-        new Matrix(layer1biases).printMatrix();
-        new Matrix(layer2biases).printMatrix();
-        
+ 
     }
 
     public static void setupInitialWeightsAndBiases(){
@@ -42,10 +48,77 @@ class Main {
         return values;
     }
 
-    public static void setupInitialBiases(){
-        //biases
-        layer1biases = new double[][] {{0.1}, {-0.36}, {-0.31}};
-        layer2biases = new double[][] {{0.16}, {-0.46}};
+    /*  fills in the layer 0 for the traning networks and only reads up to epochSize * minibatchSize 
+     *  Also fills in the expected output by getting the 1st value out of the row in the csv and turing
+     *  it into a red hot vector
+    */
+    public static void readCSV(String filePath) {
+
+        // try to read current filePath file
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            int curLine = 0;
+            String line;
+
+            // While there is a line to read from
+            while ((line = reader.readLine()) != null) {
+
+                String[] values = line.split(",");
+                inputTrainingNetwork(values, curLine);
+
+                curLine++;
+            }
+        }
+
+        catch (IOException error) {
+            error.printStackTrace();
+        }
+    
+    }
+
+    // adds a training network to the 2d array of networks also adds its coresponding expected value (note expects the network to match the demensions of the 1st layer of weights)
+    public static void inputTrainingNetwork(String[] networkInputs, int lineNumber) {
+
+        if (networkInputs == null || networkInputs.length <= 0){
+            return;
+        }
+
+        // find the correct position in the trainingNetworks[][]/expectedOutputs[][] to put the newLine data
+        int row = lineNumber / miniBatchSize;
+        int column = lineNumber % miniBatchSize;
+
+        // get the expected hot value from the 1st value in the array
+        int integerExpected = Integer.parseInt(networkInputs[0]);
+        Matrix oneHotVal = generateHotValue(integerExpected);
+        expectedOutputsOfTrainingNetworks[row][column] = oneHotVal;
+
+        // loop through the rest of the values to fill in the networks inputs (I hardCoded the inputLinesSize at the top)
+        double[][] trainingNetworkInputs = new double[inputLinesSize - 1][1];
+        for (int i = 1; i < inputLinesSize; i++){
+            int curIntValue = Integer.parseInt(networkInputs[i]);
+            trainingNetworkInputs[i - 1][0] = (double) curIntValue;
+        }
+        NeuralNetwork trainingNetwork = new NeuralNetwork(trainingNetworkInputs, 0, totalLayers);
+    }
+
+    // returns the oneHotValue of the integer that represents the expected output
+    public static Matrix generateHotValue(int integerValue){
+
+        if (integerValue < 0 || integerValue > 9){
+            return null;
+        }
+
+        double[][] values = new double[10][1];
+
+        for (int i = 0; i< values.length; i++){
+            if (i == integerValue){
+                values[i][0] = 1.00; 
+            }
+            else{
+                values[i][0] = 0.00;
+            }
+        }
+
+        return new Matrix(values);
     }
 
     public static void print2dArray(double[][] array2d){
@@ -60,6 +133,7 @@ class Main {
         }
 
     }
+
     // note it is assumed that the networks are the same sizes but different cases
     public static void updateUsingGradients(int learningRate, int numOfCases, double[][] oldValues, Matrix network1Gradient, Matrix network2Gradient){
 
