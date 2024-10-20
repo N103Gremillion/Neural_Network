@@ -4,12 +4,12 @@ class Matrix {
     // declarations
     int rowSize;
     int columnSize;
-    float[][] grid;
+    double[][] grid; 
 
     /**
      * *Constructor**
      */
-    public Matrix(float[][] inputValues) {
+    public Matrix(double[][] inputValues) {
         if (inputValues == null || inputValues.length == 0 || inputValues[0].length == 0) {
             System.out.println("invalid input values");
         }
@@ -18,7 +18,7 @@ class Matrix {
         this.columnSize = inputValues[0].length;
         
         // Deep copy of inputValues to avoid external modifications affecting the grid
-        this.grid = new float[rowSize][columnSize];
+        this.grid = new double[rowSize][columnSize]; 
         for (int i = 0; i < rowSize; i++) {
             for (int j = 0; j < columnSize; j++){
                 grid[i][j] = inputValues[i][j];
@@ -30,20 +30,20 @@ class Matrix {
      * ***************Methods*****************
      */
 
-    // add matricies
+    // add matrices
     public Matrix addMatrices(Matrix matrix) {
 
-        // invalid matrix additon check
+        // invalid matrix addition check
         if (rowSize != matrix.rowSize || columnSize != matrix.columnSize) {
             return null;
         }
 
-        float[][] resultingValues = new float[rowSize][columnSize];
+        double[][] resultingValues = new double[rowSize][columnSize];
 
         for (int row = 0; row < rowSize; row++) {
             for (int column = 0; column < columnSize; column++) {
 
-                float resultingData = grid[row][column] + matrix.grid[row][column];
+                double resultingData = grid[row][column] + matrix.grid[row][column]; 
                 resultingValues[row][column] = resultingData;
 
             }
@@ -54,20 +54,19 @@ class Matrix {
         return resultingMatrix;
     }
 
-
     public Matrix subtractMatrices(Matrix matrix) {
 
-        // invalid matrix additon check
+        // invalid matrix addition check
         if (rowSize != matrix.rowSize || columnSize != matrix.columnSize) {
             return null;
         }
 
-        float[][] resultingValues = new float[rowSize][columnSize];
+        double[][] resultingValues = new double[rowSize][columnSize]; 
 
         for (int row = 0; row < rowSize; row++) {
             for (int column = 0; column < columnSize; column++) {
 
-                float resultingData = grid[row][column] - matrix.grid[row][column];
+                double resultingData = grid[row][column] - matrix.grid[row][column]; 
                 resultingValues[row][column] = resultingData;
 
             }
@@ -81,12 +80,12 @@ class Matrix {
     // note : matrix 1 is being dotted by matrix 2 so matrix1 . matrix2
     public Matrix dotProductMatrices(Matrix matrix2) {
 
-        // invalid demensions check
+        // invalid dimensions check
         if (columnSize != matrix2.rowSize) {
             return null;
         }
 
-        float[][] resultingValues = new float[rowSize][matrix2.columnSize];
+        double[][] resultingValues = new double[rowSize][matrix2.columnSize]; 
 
         for (int m1row = 0; m1row < rowSize; m1row++) {
 
@@ -94,12 +93,12 @@ class Matrix {
             for (int m2col = 0; m2col < matrix2.columnSize; m2col++) {
 
                 // var to keep track of the dot product of a row . column
-                float rowColumnDottedData = 0;
+                double rowColumnDottedData = 0; 
 
                 for (int m1col = 0; m1col < columnSize; m1col++) {
 
-                    float curM1val = grid[m1row][m1col];
-                    float curM2val = matrix2.grid[m1col][m2col];
+                    double curM1val = grid[m1row][m1col]; 
+                    double curM2val = matrix2.grid[m1col][m2col]; 
                     rowColumnDottedData += (curM1val * curM2val);
                 }
 
@@ -120,12 +119,12 @@ class Matrix {
             return null;
         }
 
-        float[][] resultingValues = new float[rowSize][columnSize];
+        double[][] resultingValues = new double[rowSize][columnSize]; 
 
         for (int row = 0; row < rowSize; row++) {
             for (int column = 0; column < columnSize; column++) {
 
-                float resultingData = grid[row][column] * matrix2.grid[row][column];
+                double resultingData = grid[row][column] * matrix2.grid[row][column]; 
                 resultingValues[row][column] = resultingData;
 
             }
@@ -137,7 +136,7 @@ class Matrix {
     }
 
     public Matrix transposeMatrix(){
-        float[][] result = new float[columnSize][rowSize];
+        double[][] result = new double[columnSize][rowSize]; 
 
         for (int i = 0; i < rowSize; i++){
             for (int j = 0; j < columnSize; j++){
@@ -148,9 +147,9 @@ class Matrix {
         return new Matrix(result);
     }
 
-    public Matrix scalarMultiply(float scalarValue){
+    public Matrix scalarMultiply(double scalarValue){ 
 
-        float[][] scaledGrid = new float[rowSize][columnSize];
+        double[][] scaledGrid = new double[rowSize][columnSize]; 
 
         for (int i = 0; i < rowSize; i++){
             for (int j = 0; j < columnSize; j++){
