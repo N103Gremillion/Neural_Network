@@ -1,3 +1,5 @@
+import java.util.Random;
+
 class Main {
 
     static double[][] layer1weights;
@@ -10,31 +12,34 @@ class Main {
     public static void main(String args[]) {
         
         // CSVreader csv = new CSVreader("mnist_train.csv");
-        // System.out.println(csv.readCSV());
-
-        setupInitialWeights();
-        setupInitialBiases();
-        runEpoch(1);
-        runEpoch(2);
-        runEpoch(3);
-        runEpoch(4);
-        runEpoch(5);
-        runEpoch(6);
+        setupInitialWeightsAndBiases();
+        new Matrix(layer1weights).printMatrix();
+        new Matrix(layer2weights).printMatrix();
+        new Matrix(layer1biases).printMatrix();
+        new Matrix(layer2biases).printMatrix();
         
     }
 
-    public static void setupInitialWeights(){
-        //weights
-        layer1weights = new double[][] {
-            {-0.21, 0.72, -0.25, 1.0},
-            {-0.94, -0.41, -0.47, 0.63},
-            {0.15, 0.55, -0.49, -0.75}
-        };
+    public static void setupInitialWeightsAndBiases(){
+        // fill the wieghts with random values from -1 -> 1 (note : this is 15x784 since layer0 is 784 and layer 1 is 15)
+        layer1weights = initalizeWeightsOrBiases(15, 784);
+        layer2weights = initalizeWeightsOrBiases(10, 15);
+        layer1biases = initalizeWeightsOrBiases(15, 1);
+        layer2biases = initalizeWeightsOrBiases(10, 1);
+    }
 
-        layer2weights = new double[][] {
-            {0.76, 0.48, -0.73},
-            {0.34, 0.89, -0.23}
-        };
+    // fill a 2d array with vlalues form -1 to 1
+    private static double[][] initalizeWeightsOrBiases(int rows, int cols){
+        double[][] values = new double[rows][cols];
+        Random random = new Random();
+
+        for (int i = 0; i < values.length; i++) {
+            for (int j = 0; j < values[i].length; j++) {
+                double randomVal = (random.nextDouble() * 2) - 1; 
+                values[i][j] = randomVal; 
+            }
+        }
+        return values;
     }
 
     public static void setupInitialBiases(){
