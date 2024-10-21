@@ -1,5 +1,7 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
 import java.util.Scanner;
@@ -67,7 +69,7 @@ class Main {
                         // displayMisclassifiedImages(networkLoaded); 
                         break;
                     case 7:
-                        // saveNetworkState(networkLoaded);
+                        saveNetworkState(networkLoaded);
                         break;
                     case 8:
                         System.out.println("Exiting...");
@@ -108,9 +110,61 @@ class Main {
     }
 
     public static void displayTestAccuracy(boolean canDisplay) {
-        if (canDisplay) {
-            runEpoch(0, trainingNetworks, expectedOutputsOfTrainingNetworks);
+        if (!canDisplay) {
+            return;
         }
+        runEpoch(0, trainingNetworks, expectedOutputsOfTrainingNetworks);
+    }
+
+    public static void saveNetworkState(boolean canSave) {
+        if (!canSave){
+            return;
+        }
+        String fileName = "savedWeightsBiases.csv";
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))){
+            // layer 1 weights 1st
+            for (int i = 0; i < layer1weights.grid.length; i++){
+                // use a string array for every row 
+                String[] curRow = doubleToStringArray(layer1weights.grid[i]);
+                String row = String.join(",", curRow);
+                writer.write(row);
+                writer.newLine();
+            }
+            // layer 2 weights 2nd
+            for (int i = 0; i < layer2weights.grid.length; i++){
+                String[] curRow = doubleToStringArray(layer2weights.grid[i]);
+                String row = String.join(",", curRow);
+                writer.write(row);
+                writer.newLine();
+            }
+            // layer 1 biases 3rd
+            for (int i = 0; i < layer1biases.grid.length; i++){
+                String[] curRow = doubleToStringArray(layer1biases.grid[i]);
+                String row = String.join(",", curRow);
+                writer.write(row);
+                writer.newLine();
+            }
+            // layer 2 biases 4th
+            for (int i = 0; i < layer2biases.grid.length; i++){
+                String[] curRow = doubleToStringArray(layer2biases.grid[i]);
+                String row = String.join(",", curRow);
+                writer.write(row);
+                writer.newLine();
+            }
+        }
+        catch (IOException error) {
+            System.out.println("Error trying to write biases and weights");
+        }
+    }
+
+    public static String[] doubleToStringArray(double[] array){
+        // convert a double arrray to a string array
+        String[] result = new String[array.length];
+        for (int i = 0; i < array.length; i++){
+            result[i] = String.valueOf(array[i]);
+        }
+        return result;
     }
 
     public static void setupInitialWeightsAndBiases(){
