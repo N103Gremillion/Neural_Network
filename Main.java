@@ -5,7 +5,7 @@ import java.util.Random;
 
 class Main {
 
-    static int learningRate = 3;
+    static double learningRate = 3.000;
     static int totalLayers = 3;
     static int totalEpochs = 30;
     static int miniBatchSize = 10;
@@ -23,7 +23,17 @@ class Main {
 
         readCSV("mnist_train.csv");
         setupInitialWeightsAndBiases();
- 
+        
+        // train the network from the mnist_train.csv (uses 10 as the minibatach aka. 1 row of the trainingNetworks)
+        System.out.println("layer 2 weights before 1st epoch");
+
+        print2dArray(layer2biases);
+        
+        System.out.println("layer 2 weights after 1st epoch");
+
+        print2dArray(layer1biases);
+
+        runEpoch(1, trainingNetworks[0], expectedOutputsOfTrainingNetworks[0]);
     }
 
     public static void setupInitialWeightsAndBiases(){
@@ -61,6 +71,11 @@ class Main {
 
             // While there is a line to read from
             while ((line = reader.readLine()) != null) {
+
+                // if your hit the 30 epoch total
+                if (curLine >= totalEpochs * miniBatchSize) {
+                    break;
+                }
 
                 String[] values = line.split(",");
                 inputTrainingNetwork(values, curLine);
@@ -118,6 +133,8 @@ class Main {
             }
         }
 
+            
+
         return new Matrix(values);
     }
 
@@ -135,10 +152,15 @@ class Main {
     }
 
     // note it is assumed that the networks are the same sizes but different cases
-    public static void updateUsingGradients(int learningRate, int numOfCases, double[][] oldValues, Matrix network1Gradient, Matrix network2Gradient){
+    public static void updateUsingGradients(double learningRate, int numOfCases, double[][] oldValues, Matrix[] caseGradients){
 
         double learningRateOverNumOfCases = learningRate / numOfCases;
-        Matrix gradientSum = network1Gradient.addMatrices(network2Gradient);
+        Matrix gradientSum = caseGradients[0].addMatrices(caseGradients[1]);
+
+        for (int i = 2; i < caseGradients.length; i++){
+            gradientSum = gradientSum.addMatrices(caseGradients[i]);
+        }
+
         Matrix scaledGradientSum =  gradientSum.scalarMultiply(learningRateOverNumOfCases);
 
         // update the old weights/biases
@@ -150,99 +172,51 @@ class Main {
     }
     
     // function to setup and test the inputs/weights/biases in the excel file (kinda the entry point for main to reference)
-    public static void runEpoch(int epochNum){
+    public static void runEpoch(int epochNum, NeuralNetwork[] networks, Matrix[] expecteds){
+        
+        // values to keep track of accuracy of the epoch
+        int totalCorrectPredictions = 0;
+        int totalPredictions = 0;
+        int[] correctsForEachNum = new int[10];
+        int[] totalForEachNum = new int[];
+
         //********************************Epoc 1***************************************** */
-        //******************* for training case # 1 *************
-        double[][] layer0InputCase1 = {{0}, {1}, {0}, {1}};
-        double[][] case1ExpectedOutput = {{0}, {1}};
+        for (int caseNum = 0; caseNum < networks.length; caseNum++) {
+            NeuralNetwork currentNetwork = networks[caseNum];
+            Matrix currentExpectedOutput = expecteds[caseNum];
 
-        // initiate the startingLayer
-        NeuralNetwork network1 = new NeuralNetwork(layer0InputCase1, 0, totalLayers);
-        System.out.println(String.format("************************* Epoch %d ************************************", epochNum));
-        System.out.println("\n*************************Case 1 / Case 2****************************");
-        
-        // 1st forward pass
-        network1.forwardPass(network1.layers[0].activationValues, new Matrix(layer1weights), new Matrix(layer1biases), 1); 
+            // Forward pass for both layers
+            currentNetwork.forwardPass(currentNetwork.layers[0].activationValues, new Matrix(layer1weights), new Matrix(layer1biases), 1);
+            currentNetwork.forwardPass(currentNetwork.layers[1].activationValues, new Matrix(layer2weights), new Matrix(layer2biases), 2);
 
-        // 2nd forward pass
-        network1.forwardPass(network1.layers[1].activationValues, new Matrix(layer2weights), new Matrix(layer2biases), 2); 
-
-        // back propagation
-        for (int curLayer = totalLayers; curLayer > 1; curLayer--){
-            network1.backwardPropogate(new Matrix(case1ExpectedOutput), curLayer);
+            // update the cout of the num / correctly predicted num
+            int predictedNum = 
+            if (pr)
+            // Backpropagation
+            for (int curLayer = totalLayers; curLayer > 1; curLayer--) {
+                currentNetwork.backwardPropogate(currentExpectedOutput, curLayer);
+            }
         }
-       
-        /**********************training case # 2***************************/
-        double[][] layer0InputCase2 = {{1}, {0}, {1}, {0}};
-        double[][] case2ExpectedOutput = {{1}, {0}};
+        /***********************adjust the weights after all 10 cases for this minibatch********************************/ 
+        Matrix[] layer2WeightGradients = new Matrix[networks.length];
+        Matrix[] layer1WeightGradients = new Matrix[networks.length];
+        Matrix[] layer2BiasGradients = new Matrix[networks.length];
+        Matrix[] layer1BiasGradients = new Matrix[networks.length];
 
-        // initiate the startingLayer
-        NeuralNetwork network2 = new NeuralNetwork(layer0InputCase2, 0, totalLayers);
-        
-        // 1st forward pass
-        network2.forwardPass(network2.layers[0].activationValues, new Matrix(layer1weights), new Matrix(layer1biases), 1); 
-        network2.forwardPass(network2.layers[1].activationValues, new Matrix(layer2weights), new Matrix(layer2biases), 2);
-        
-        for (int curLayer = totalLayers; curLayer > 1; curLayer--){
-            network2.backwardPropogate(new Matrix(case2ExpectedOutput), curLayer);
+        // Loop through each network and populate the arrays
+        for (int i = 0; i < networks.length; i++) {
+            layer2WeightGradients[i] = networks[i].layers[2].weightGradient;
+            layer1WeightGradients[i] = networks[i].layers[1].weightGradient;
+            layer2BiasGradients[i] = networks[i].layers[2].biasGradient;
+            layer1BiasGradients[i] = networks[i].layers[1].biasGradient;
         }
 
-        /***********************adjust the weights after case 1 and 2********************************/ 
-        updateUsingGradients(learningRate, 2, layer2weights, network1.layers[2].weightGradient, network2.layers[2].weightGradient);
-        updateUsingGradients(learningRate, 2, layer1weights, network1.layers[1].weightGradient, network2.layers[1].weightGradient);
-        updateUsingGradients(learningRate, 2, layer2biases, network1.layers[2].biasGradient, network2.layers[2].biasGradient);
-        updateUsingGradients(learningRate, 2, layer1biases, network1.layers[1].biasGradient, network2.layers[1].biasGradient);
+        updateUsingGradients(learningRate, 10, layer2weights, layer2WeightGradients);
+        updateUsingGradients(learningRate, 10, layer1weights, layer1WeightGradients);
+        updateUsingGradients(learningRate, 10, layer2biases, layer2BiasGradients);
+        updateUsingGradients(learningRate, 10, layer1biases, layer1BiasGradients);
         
-        System.out.println("\nThe Update weights / biases after the first 2 cases are : \n");
-
-        System.out.println("\n************** Layer 1 Weights ******************\n");
-        print2dArray(layer1weights);
-        System.out.println("\n************** Layer 2 Weights ******************\n");
-        print2dArray(layer2weights);
-        System.out.println("\n************** Layer 1 Biases ******************\n");
-        print2dArray(layer1biases);
-        System.out.println("\n************** Layer 2 Biases ******************\n");
-        print2dArray(layer2biases);
-
-        /*****************training case # 3************************ */
-        double[][] layer0InputCase3 = {{0}, {0}, {1}, {1}};
-        double[][] case3ExpectedOutput = {{0}, {1}};
-
-        NeuralNetwork network3 = new NeuralNetwork(layer0InputCase3, 0, totalLayers);
-        System.out.println("\n*************************Case 3 / Case 4****************************");
-        
-        // 1st forward pass
-        network3.forwardPass(network3.layers[0].activationValues, new Matrix(layer1weights), new Matrix(layer1biases), 1); 
-        // 2nd forward pass
-        network3.forwardPass(network3.layers[1].activationValues, new Matrix(layer2weights), new Matrix(layer2biases), 2); 
-
-        // back propagation
-        for (int curLayer = totalLayers; curLayer > 1; curLayer--){
-            network3.backwardPropogate(new Matrix(case3ExpectedOutput), curLayer);
-        }
-       
-        /**********************training case # 4***************************/
-        double[][] layer0InputCase4 = {{1}, {1}, {0}, {0}};
-        double[][] case4ExpectedOutput = {{1}, {0}};
-
-        // initiate the startingLayer
-        NeuralNetwork network4 = new NeuralNetwork(layer0InputCase4, 0, totalLayers);
-        
-        // 1st forward pass
-        network4.forwardPass(network4.layers[0].activationValues, new Matrix(layer1weights), new Matrix(layer1biases), 1); 
-        network4.forwardPass(network4.layers[1].activationValues, new Matrix(layer2weights), new Matrix(layer2biases), 2);
-        
-        for (int curLayer = totalLayers; curLayer > 1; curLayer--){
-            network4.backwardPropogate(new Matrix(case4ExpectedOutput), curLayer);
-        }
-
-        /***********************adjust the weights after case 1 and 2********************************/ 
-        updateUsingGradients(learningRate, 2, layer2weights, network4.layers[2].weightGradient, network3.layers[2].weightGradient);
-        updateUsingGradients(learningRate, 2, layer1weights, network4.layers[1].weightGradient, network3.layers[1].weightGradient);
-        updateUsingGradients(learningRate, 2, layer2biases, network4.layers[2].biasGradient, network3.layers[2].biasGradient);
-        updateUsingGradients(learningRate, 2, layer1biases, network4.layers[1].biasGradient, network3.layers[1].biasGradient);
-        
-        System.out.println("\nThe Update weights / biases after the second 2 cases are : \n");
+        System.out.println("\nThe Update weights / biases after this minibatch are : \n");
 
         System.out.println("\n************** Layer 1 Weights ******************\n");
         print2dArray(layer1weights);
