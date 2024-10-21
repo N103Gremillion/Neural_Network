@@ -25,6 +25,8 @@ class Main {
     static NeuralNetwork[][] networks;
     // this corresponds to the trainingNetworks and has the expected values using the label of the 1st value in each csv row
     static Matrix[][] expectedOutputsOfNetworks;
+    static boolean showAllTestingImages = false;
+    static boolean showAllTestingMisclassifications = false;
     
     public static void main(String[] args) {
 
@@ -209,6 +211,9 @@ class Main {
             System.out.println("Load a network before dispalying images!!! \n");
             return;
         }
+        setupTestingNetwork();
+        showAllTestingImages = true;
+        runEpoch(0, networks, expectedOutputsOfNetworks);
     }
 
     /******************Optrion 6 on the CMDLine**************************/
@@ -217,6 +222,9 @@ class Main {
             System.out.println("Load a network before dispalying images!!! \n");
             return;
         }
+        setupTestingNetwork();
+        showAllTestingMisclassifications = true;
+        runEpoch(0, networks, expectedOutputsOfNetworks);
     }
 
     /*****************************Optrion 7 on CMDLine***************************/
@@ -407,6 +415,16 @@ class Main {
         }
         
         System.out.println(String.format("*******************************************************************************************************", epochNum));
+
+        // show images depending on the globall flags (booleans)
+        if (showAllTestingImages == true){
+            System.out.println("showing all the testing images");
+            showAllTestingImages = false;
+        }
+        else if (showAllTestingMisclassifications == true){
+            System.out.println("showing all the misclassified images");
+            showAllTestingMisclassifications = false;
+        }
     }
 
     // returns the oneHotValue of the integer that represents the expected output
