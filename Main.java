@@ -63,10 +63,10 @@ class Main {
                         displayTestingAccuracy(networkLoaded); 
                         break;
                     case 5:
-                        // runNetwork(networkLoaded); 
+                        runTestingSetDispalyingAll(networkLoaded); 
                         break;
                     case 6:
-                        // displayMisclassifiedImages(networkLoaded); 
+                        runTestingSetDisplayingMisclassified(networkLoaded); 
                         break;
                     case 7:
                         saveNetworkState(networkLoaded);
@@ -201,6 +201,22 @@ class Main {
         // run through 1 epoc with the training data;
         setupTestingNetwork();
         runEpoch(0, networks, expectedOutputsOfNetworks);
+    }
+
+    /***************Optrion 5 on the CMDLine****************************/
+    public static void runTestingSetDispalyingAll(boolean canDisplay) {
+        if(!canDisplay){
+            System.out.println("Load a network before dispalying images!!! \n");
+            return;
+        }
+    }
+
+    /******************Optrion 6 on the CMDLine**************************/
+    public static void runTestingSetDisplayingMisclassified(boolean canDisplay){
+        if (!canDisplay){
+            System.out.println("Load a network before dispalying images!!! \n");
+            return;
+        }
     }
 
     /*****************************Optrion 7 on CMDLine***************************/
