@@ -1,21 +1,15 @@
-/*
-Name : Nathan Gremillion
-Date : 10/22/2024
-Project Description : this porgram takes in csvs as the data for grey scale values of an image
-it then turns each line into a NN and then is able to train the NN to recognize the numbers 0-9 
-given a csv input of greyScale values
-*/
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Random;
+import java.util.Scanner;
+
 
 class Main {
 
     static double learningRate = 1;
     static int totalLayers = 3;
-    static int totalEpochs = 60;
+    static int totalEpochs = 30;
     static int miniBatchSize = 10;
     static int inputLinesSize = 785;
     static int totalDataPoints = 60000;
@@ -29,8 +23,76 @@ class Main {
     // this corresponds to the trainingNetworks and has the expected values using the label of the 1st value in each csv row
     static Matrix[][] expectedOutputsOfTrainingNetworks;
     
-    public static void main(String args[]) {
-        
+    public static void main(String[] args) {
+
+        boolean running = true;
+        boolean networkLoaded = false;
+        Scanner scanner = new Scanner(System.in);
+
+        while (running) {
+
+            System.out.println("Enter a valid number 1-8 as a command:");
+            System.out.println("1 - Train the network");
+            System.out.println("2 - Load pre-trained network");
+            System.out.println("3 - Display network accuracy on training data");
+            System.out.println("4 - Display network accuracy on testing data");
+            System.out.println("5 - Run network on testing data showing images and labels");
+            System.out.println("6 - Display the misclassified testing images");
+            System.out.println("7 - Save the network state to file");
+            System.out.println("8 - Exit");
+
+            try {
+
+                int numInput = scanner.nextInt();
+
+                switch (numInput) {
+                    case 1:
+                        trainNetwork();
+                        networkLoaded = true;
+                        break;
+                    case 2:
+                        System.out.println("Loading pre-trained network...");
+                        networkLoaded = true;
+                        break;
+                    case 3:
+                        displayTestAccuracy(networkLoaded);
+                        break;
+                    case 4:
+                        // displayTestingAccuracy(networkLoaded); 
+                        break;
+                    case 5:
+                        // runNetwork(networkLoaded); 
+                        break;
+                    case 6:
+                        // displayMisclassifiedImages(networkLoaded); 
+                        break;
+                    case 7:
+                        // saveNetworkState(networkLoaded);
+                        break;
+                    case 8:
+                        System.out.println("Exiting...");
+                        running = false;
+                        break;
+                    default:
+                        System.out.println("This is an invalid input. Please enter a number between 1 and 8.");
+                        break;
+
+                }
+            }
+
+            // execption when the input is not an integer (invalid input)
+            catch (Exception e) {
+
+                System.out.println("Invalid input. Please enter a valid number between 1 and 8.");
+                scanner.next(); 
+
+            }
+        }
+
+        scanner.close();
+    }
+
+    public static void trainNetwork(){
         // initalize the training network / expected outputs
 
         trainingNetworks = new  NeuralNetwork[totalMiniBatches][miniBatchSize];
@@ -43,7 +105,12 @@ class Main {
         for (int curEpoch = 1; curEpoch <= totalEpochs; curEpoch++){
             runEpoch(curEpoch, trainingNetworks, expectedOutputsOfTrainingNetworks);
         }
+    }
 
+    public static void displayTestAccuracy(boolean canDisplay) {
+        if (canDisplay) {
+            runEpoch(0, trainingNetworks, expectedOutputsOfTrainingNetworks);
+        }
     }
 
     public static void setupInitialWeightsAndBiases(){
@@ -266,8 +333,8 @@ class Main {
             double curNumAccuracy = (double) correctsForEachNum[i] / totalForEachNum[i] * 100;
             System.out.println(String.format("The accuracy of %d : %d / %d or %.2f", i, correctsForEachNum[i], totalForEachNum[i], curNumAccuracy));
         }
-
-        System.out.println(String.format("************************************ End of Epoch %d **********************************************", epochNum));
+        
+        System.out.println(String.format("*******************************************************************************************************", epochNum));
     }
 
 
