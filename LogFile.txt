@@ -10,3 +10,8 @@
 
 - looked back at perceptron notes and setup the perceptron class (basic implementation with wieghts inputs and biases)
 - started messing with the neuralNetwork calss
+
+*************** part 2 ****************
+- watched video on how to formate csv - https://www.youtube.com/watch?v=zKDmzKaAQro&t=449s
+
+- talked to Daniel about the deffinitoin of an epoch I was confused at first
