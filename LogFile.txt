@@ -12,6 +12,12 @@
 - started messing with the neuralNetwork calss
 
 *************** part 2 ****************
+- throughout this I usedchatGpt to give me example of how to use certain imports and things Ex: how to join a Array into a String output : use String.join();
+
 - watched video on how to formate csv - https://www.youtube.com/watch?v=zKDmzKaAQro&t=449s
 
 - talked to Daniel about the deffinitoin of an epoch I was confused at first
+
+- learned about writing to a file - https://www.youtube.com/watch?v=U28eKSLI7pw
+- also watched one on reading even tho I did this for the inital reading in of the csv - https://www.youtube.com/watch?v=IMfMyd3M1Cw
+- video on file I/O - https://www.youtube.com/watch?v=hgF21imQ_Is

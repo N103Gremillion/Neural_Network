@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -53,8 +54,7 @@ class Main {
                         networkLoaded = true;
                         break;
                     case 2:
-                        System.out.println("Loading pre-trained network...");
-                        networkLoaded = true;
+                        networkLoaded = loadPreTrainedNetwork();
                         break;
                     case 3:
                         displayTestAccuracy(networkLoaded);
@@ -97,16 +97,97 @@ class Main {
     public static void trainNetwork(){
         // initalize the training network / expected outputs
 
-        trainingNetworks = new  NeuralNetwork[totalMiniBatches][miniBatchSize];
-        expectedOutputsOfTrainingNetworks = new Matrix[totalMiniBatches][miniBatchSize];
-
-        readCSV("mnist_train.csv");
+        setUpTrainingNetwork();
         setupInitialWeightsAndBiases();
 
         // train the network from the mnist_train.csv (uses 10 as the minibatach aka. 1 row of the trainingNetworks)
         for (int curEpoch = 1; curEpoch <= totalEpochs; curEpoch++){
             runEpoch(curEpoch, trainingNetworks, expectedOutputsOfTrainingNetworks);
         }
+    }
+
+    // loads a pretrained network if there is one
+    public static boolean loadPreTrainedNetwork() {
+
+        String filePath = "savedWeightsBiases.csv";
+        File file = new File(filePath);
+
+        // only load if it exists
+        if (!file.exists()){
+            return false;
+        }
+
+        System.out.println("Loading in the pretrained data.....");
+
+        // setup the 1st layer of inputs for the test network
+        setUpTrainingNetwork();
+        setupInitialWeightsAndBiases();
+
+        // use same strategey to read as I did with the training/testing csv
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+
+            int curLine = 0;
+            String line;
+
+            // these are the bounds on when to switch from layer weights/biases
+            // order is layer 1 weights / layer 2 weights / layer 1 biases / layer 2 biases
+            int threshhold1 = layer1weights.grid.length;
+            int threshhold2 = threshhold1 + layer2weights.grid.length;
+            int threshhold3 = threshhold2 + layer1biases.grid.length;
+            int threshhold4 = threshhold3 + layer2biases.grid.length;
+
+            // While there is a line to read from
+            while ((line = reader.readLine()) != null) {
+
+                String[] values = line.split(",");
+                double[] doubleValues = new double[values.length];
+
+                // convert the string[] to double[]
+                for (int i = 0; i < values.length; i++){
+                    doubleValues[i] = Double.parseDouble(values[i]);
+                }
+
+                // logic to add the liine to the correct wieght / bias group
+                if (curLine < threshhold1){
+                    // add to layer 1 weights
+                    layer1weights.grid[curLine] = doubleValues;
+                }
+                else if (curLine >= threshhold1 && curLine < threshhold2){
+                    // add to layer 2 weights
+                    int row = curLine - threshhold1;
+                    layer2weights.grid[row] = doubleValues;
+                }
+                else if (curLine >= threshhold2 && curLine < threshhold3){
+                    // add to layer 1 biases
+                    int row = curLine - threshhold2;
+                    layer1biases.grid[row] = doubleValues;
+                }
+                else if (curLine < threshhold4){
+                    // add to layer 2 biases
+                    int row = curLine - threshhold3;
+                    layer2biases.grid[row] = doubleValues;
+                }
+                curLine++;
+            }
+
+        }
+
+        catch (IOException error) {
+            System.out.println("Error when trying to load pretrained network");
+            error.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
+
+    public static void setUpTrainingNetwork(){
+
+        trainingNetworks = new  NeuralNetwork[totalMiniBatches][miniBatchSize];
+        expectedOutputsOfTrainingNetworks = new Matrix[totalMiniBatches][miniBatchSize];
+
+        readCSV("mnist_train.csv");
+
     }
 
     public static void displayTestAccuracy(boolean canDisplay) {
