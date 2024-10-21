@@ -1,3 +1,11 @@
+/*
+Name : Nathan Gremillion
+Date : 10/22/2024
+Project Description : this porgram takes in csvs as the data for grey scale values of an image
+it then turns each line into a NN and then is able to train the NN to recognize the numbers 0-9 
+given a csv input of greyScale values
+*/
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
