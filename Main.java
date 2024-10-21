@@ -15,16 +15,16 @@ class Main {
     static int totalEpochs = 30;
     static int miniBatchSize = 10;
     static int inputLinesSize = 785;
-    static int totalDataPoints = 60000;
-    static int totalMiniBatches = totalDataPoints / miniBatchSize;
+    static int totalDataPoints;
+    static int totalMiniBatches;
     static Matrix layer1weights;
     static Matrix layer2weights;
     static Matrix layer1biases;
     static Matrix layer2biases;
     // this will hold all the csv data in a readable format for my setup
-    static NeuralNetwork[][] trainingNetworks;
+    static NeuralNetwork[][] networks;
     // this corresponds to the trainingNetworks and has the expected values using the label of the 1st value in each csv row
-    static Matrix[][] expectedOutputsOfTrainingNetworks;
+    static Matrix[][] expectedOutputsOfNetworks;
     
     public static void main(String[] args) {
 
@@ -57,10 +57,10 @@ class Main {
                         networkLoaded = loadPreTrainedNetwork();
                         break;
                     case 3:
-                        displayTestAccuracy(networkLoaded);
+                        displayTrainingAccuracy(networkLoaded);
                         break;
                     case 4:
-                        // displayTestingAccuracy(networkLoaded); 
+                        displayTestingAccuracy(networkLoaded); 
                         break;
                     case 5:
                         // runNetwork(networkLoaded); 
@@ -94,6 +94,7 @@ class Main {
         scanner.close();
     }
 
+    /********************Option 1 on CMDLine**********************/
     public static void trainNetwork(){
         // initalize the training network / expected outputs
 
@@ -102,10 +103,11 @@ class Main {
 
         // train the network from the mnist_train.csv (uses 10 as the minibatach aka. 1 row of the trainingNetworks)
         for (int curEpoch = 1; curEpoch <= totalEpochs; curEpoch++){
-            runEpoch(curEpoch, trainingNetworks, expectedOutputsOfTrainingNetworks);
+            runEpoch(curEpoch, networks, expectedOutputsOfNetworks);
         }
     }
 
+    /*******************Optrion 2 on CMDLine**********************/
     // loads a pretrained network if there is one
     public static boolean loadPreTrainedNetwork() {
 
@@ -181,24 +183,30 @@ class Main {
         return true;
     }
 
-    public static void setUpTrainingNetwork(){
-
-        trainingNetworks = new  NeuralNetwork[totalMiniBatches][miniBatchSize];
-        expectedOutputsOfTrainingNetworks = new Matrix[totalMiniBatches][miniBatchSize];
-
-        readCSV("mnist_train.csv");
-
-    }
-
-    public static void displayTestAccuracy(boolean canDisplay) {
+    /********************Optrion 3 on CMDLine******************/
+    public static void displayTrainingAccuracy(boolean canDisplay) {
         if (!canDisplay) {
+            System.out.println("Load a network before dispalying accuracy!!! \n");
             return;
         }
-        runEpoch(0, trainingNetworks, expectedOutputsOfTrainingNetworks);
+        runEpoch(0, networks, expectedOutputsOfNetworks);
     }
 
+    /***************Options 4 on CMDLine*********************/
+    public static void displayTestingAccuracy(boolean canDisplay) {
+        if (!canDisplay){
+            System.out.println("Load a network before dispalying accuracy!!! \n");
+            return;
+        }
+        // run through 1 epoc with the training data;
+        setupTestingNetwork();
+        runEpoch(0, networks, expectedOutputsOfNetworks);
+    }
+
+    /*****************************Optrion 7 on CMDLine***************************/
     public static void saveNetworkState(boolean canSave) {
         if (!canSave){
+            System.out.println("Load a network before saving!!! \n");
             return;
         }
         String fileName = "savedWeightsBiases.csv";
@@ -289,7 +297,6 @@ class Main {
             // While there is a line to read from
             while ((line = reader.readLine()) != null) {
 
-                // if your hit the 30 epoch total
                 if (curLine >= 60000) {
                     break;
                 }
@@ -321,7 +328,7 @@ class Main {
         // get the expected hot value from the 1st value in the array
         int integerExpected = Integer.parseInt(networkInputs[0]);
         Matrix oneHotVal = generateHotValue(integerExpected);
-        expectedOutputsOfTrainingNetworks[row][column] = oneHotVal;
+        expectedOutputsOfNetworks[row][column] = oneHotVal;
 
         // loop through the rest of the values to fill in the networks inputs (I hardCoded the inputLinesSize at the top)
         double[][] trainingNetworkInputs = new double[inputLinesSize - 1][1];
@@ -332,8 +339,58 @@ class Main {
         }
 
         NeuralNetwork trainingNetwork = new NeuralNetwork(trainingNetworkInputs, 0, totalLayers);
-        trainingNetworks[row][column] = trainingNetwork;
+        networks[row][column] = trainingNetwork;
 
+    }
+
+    public static void runEpoch(int epochNum, NeuralNetwork[][] networks, Matrix[][] expecteds) {
+        int totalCorrectPredictions = 0;
+        int totalPredictions = 0;
+        int[] correctsForEachNum = new int[10];
+        int[] totalForEachNum = new int[10];
+
+        System.out.println(String.format("************************************ EPOCH %d **********************************************", epochNum));
+
+        for (int curRow = 0; curRow < networks.length; curRow++) {
+            for (int caseNum = 0; caseNum < miniBatchSize; caseNum++) {
+                NeuralNetwork currentNetwork = networks[curRow][caseNum];
+                Matrix currentExpectedOutput = expecteds[curRow][caseNum];
+
+                // Forward pass
+                currentNetwork.forwardPass(currentNetwork.layers[0].activationValues, layer1weights, layer1biases, 1);
+                currentNetwork.forwardPass(currentNetwork.layers[1].activationValues, layer2weights, layer2biases, 2);
+
+                // Get predictions 
+                int predictedOutput = getPredictedOutput(currentNetwork.layers[2].activationValues);
+                int expectedIntegerOutput = getIntOfHotValue(currentExpectedOutput);
+
+                // Backpropagation
+                for (int curLayer = totalLayers; curLayer > 1; curLayer--) {
+                    currentNetwork.backwardPropogate(currentExpectedOutput, curLayer);
+                }
+
+                if (predictedOutput == expectedIntegerOutput) {
+                    totalCorrectPredictions++;
+                    correctsForEachNum[predictedOutput]++;
+                }
+                totalPredictions++;
+                totalForEachNum[expectedIntegerOutput]++;
+            }
+
+            // Adjust the weights after processing the mini-batch
+            updateWeightsForMiniBatch(networks[curRow]);
+        }
+
+        // Display epoch accuracy
+        double accuracy = (double) totalCorrectPredictions / totalPredictions * 100;
+        System.out.printf("Total accuracy of Epoch %d: %d / %d (%.2f%%)%n", epochNum, totalCorrectPredictions, totalPredictions, accuracy);
+        // accuracies for each of the numbers
+        for (int i = 0; i < correctsForEachNum.length; i++){
+            double curNumAccuracy = (double) correctsForEachNum[i] / totalForEachNum[i] * 100;
+            System.out.println(String.format("The accuracy of %d : %d / %d or %.2f", i, correctsForEachNum[i], totalForEachNum[i], curNumAccuracy));
+        }
+        
+        System.out.println(String.format("*******************************************************************************************************", epochNum));
     }
 
     // returns the oneHotValue of the integer that represents the expected output
@@ -421,57 +478,27 @@ class Main {
         return result;
     }
 
-    // function to setup and test the inputs/weights/biases in the excel file (kinda the entry point for main to reference)
-    public static void runEpoch(int epochNum, NeuralNetwork[][] networks, Matrix[][] expecteds) {
-        int totalCorrectPredictions = 0;
-        int totalPredictions = 0;
-        int[] correctsForEachNum = new int[10];
-        int[] totalForEachNum = new int[10];
+    public static void setUpTrainingNetwork(){
 
-        System.out.println(String.format("************************************ EPOCH %d **********************************************", epochNum));
+        totalDataPoints = 60000;
+        totalMiniBatches = totalDataPoints / miniBatchSize;
+        networks = new  NeuralNetwork[totalMiniBatches][miniBatchSize];
+        expectedOutputsOfNetworks = new Matrix[totalMiniBatches][miniBatchSize];
 
-        for (int curRow = 0; curRow < networks.length; curRow++) {
-            for (int caseNum = 0; caseNum < miniBatchSize; caseNum++) {
-                NeuralNetwork currentNetwork = networks[curRow][caseNum];
-                Matrix currentExpectedOutput = expecteds[curRow][caseNum];
+        readCSV("mnist_train.csv");
 
-                // Forward pass
-                currentNetwork.forwardPass(currentNetwork.layers[0].activationValues, layer1weights, layer1biases, 1);
-                currentNetwork.forwardPass(currentNetwork.layers[1].activationValues, layer2weights, layer2biases, 2);
-
-                // Get predictions 
-                int predictedOutput = getPredictedOutput(currentNetwork.layers[2].activationValues);
-                int expectedIntegerOutput = getIntOfHotValue(currentExpectedOutput);
-
-                // Backpropagation
-                for (int curLayer = totalLayers; curLayer > 1; curLayer--) {
-                    currentNetwork.backwardPropogate(currentExpectedOutput, curLayer);
-                }
-
-                if (predictedOutput == expectedIntegerOutput) {
-                    totalCorrectPredictions++;
-                    correctsForEachNum[predictedOutput]++;
-                }
-                totalPredictions++;
-                totalForEachNum[expectedIntegerOutput]++;
-            }
-
-            // Adjust the weights after processing the mini-batch
-            updateWeightsForMiniBatch(networks[curRow]);
-        }
-
-        // Display epoch accuracy
-        double accuracy = (double) totalCorrectPredictions / totalPredictions * 100;
-        System.out.printf("Total accuracy of Epoch %d: %d / %d (%.2f%%)%n", epochNum, totalCorrectPredictions, totalPredictions, accuracy);
-        // accuracies for each of the numbers
-        for (int i = 0; i < correctsForEachNum.length; i++){
-            double curNumAccuracy = (double) correctsForEachNum[i] / totalForEachNum[i] * 100;
-            System.out.println(String.format("The accuracy of %d : %d / %d or %.2f", i, correctsForEachNum[i], totalForEachNum[i], curNumAccuracy));
-        }
-        
-        System.out.println(String.format("*******************************************************************************************************", epochNum));
     }
 
+    public static void setupTestingNetwork(){
+
+        totalDataPoints = 10000;
+        totalMiniBatches = totalDataPoints / miniBatchSize;
+        networks = new NeuralNetwork[totalMiniBatches][miniBatchSize];
+        expectedOutputsOfNetworks = new Matrix[totalMiniBatches][miniBatchSize];
+
+        readCSV("mnist_test.csv");
+
+    }
 
     /**
      * Update weights and biases using gradients collected from a mini-batch of networks.
