@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
+
 
 
 class Main {
@@ -27,12 +29,16 @@ class Main {
     static Matrix[][] expectedOutputsOfNetworks;
     static boolean showAllTestingImages = false;
     static boolean showAllTestingMisclassifications = false;
+    static HashMap<Integer, Character> pixelsMap = new HashMap<>();
     
     public static void main(String[] args) {
 
         boolean running = true;
         boolean networkLoaded = false;
         Scanner scanner = new Scanner(System.in);
+
+        // fill the pixel hashMap
+        fillPixelsMap();
 
         while (running) {
 
@@ -418,13 +424,21 @@ class Main {
 
         // show images depending on the globall flags (booleans)
         if (showAllTestingImages == true){
-            System.out.println("showing all the testing images");
+            showTestingImages();
             showAllTestingImages = false;
         }
         else if (showAllTestingMisclassifications == true){
-            System.out.println("showing all the misclassified images");
+            showMisclassifiedImages();
             showAllTestingMisclassifications = false;
         }
+    }
+
+    public static void showTestingImages() {
+        System.out.println("showing all the testing images");
+    }
+
+    public static void showMisclassifiedImages() {
+        System.out.println("showing all the misclassified images");
     }
 
     // returns the oneHotValue of the integer that represents the expected output
@@ -444,8 +458,6 @@ class Main {
                 values[i][0] = 0.00;
             }
         }
-
-            
 
         return new Matrix(values);
     }
@@ -556,6 +568,15 @@ class Main {
         updateUsingGradients(learningRate, miniBatch.length, layer1weights.grid, layer1WeightGradients);
         updateUsingGradients(learningRate, miniBatch.length, layer2biases.grid, layer2BiasGradients);
         updateUsingGradients(learningRate, miniBatch.length, layer1biases.grid, layer1BiasGradients);
+    }
+
+    // this function sets up the ranges for what char a grey scale value should represent
+    private static void fillPixelsMap() {
+        // possible "densities" of pixel values 0-62 to small to show 63-125 low density 126-189 medium density > 189 high density
+        pixelsMap.put(0, ' ');
+        pixelsMap.put(63, '.');
+        pixelsMap.put(126, '+');
+        pixelsMap.put(189, '#');
     }
 
 }
