@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -12,6 +11,7 @@ import java.util.Scanner;
 
 class Main {
 
+    static final Scanner scanner = new Scanner(System.in);
     static double learningRate = 1;
     static int totalLayers = 3;
     static int totalEpochs = 30;
@@ -29,16 +29,11 @@ class Main {
     static Matrix[][] expectedOutputsOfNetworks;
     static boolean showAllTestingImages = false;
     static boolean showAllTestingMisclassifications = false;
-    static HashMap<Integer, Character> pixelsMap = new HashMap<>();
     
     public static void main(String[] args) {
 
         boolean running = true;
         boolean networkLoaded = false;
-        Scanner scanner = new Scanner(System.in);
-
-        // fill the pixel hashMap
-        fillPixelsMap();
 
         while (running) {
 
@@ -52,9 +47,11 @@ class Main {
             System.out.println("7 - Save the network state to file");
             System.out.println("8 - Exit");
 
+            String input = scanner.nextLine().trim();
+
             try {
 
-                int numInput = scanner.nextInt();
+                int numInput = Integer.parseInt(input);
 
                 switch (numInput) {
                     case 1:
@@ -93,8 +90,7 @@ class Main {
             // execption when the input is not an integer (invalid input)
             catch (Exception e) {
 
-                System.out.println("Invalid input. Please enter a valid number between 1 and 8.");
-                scanner.next(); 
+                System.out.println("Invalid input. Please enter a valid number between 1 and 8."); 
 
             }
         }
@@ -424,21 +420,125 @@ class Main {
 
         // show images depending on the globall flags (booleans)
         if (showAllTestingImages == true){
-            showTestingImages();
+            showTestingImages(networks, expecteds);
             showAllTestingImages = false;
         }
         else if (showAllTestingMisclassifications == true){
-            showMisclassifiedImages();
+            showMisclassifiedImages(networks, expecteds);
             showAllTestingMisclassifications = false;
         }
     }
 
-    public static void showTestingImages() {
-        System.out.println("showing all the testing images");
+    // shows a graphical representation of all images (using greyscale values) 1 at a time
+    public static void showTestingImages(NeuralNetwork[][] networks, Matrix[][] expecteds) {
+
+        for (int curRow = 0; curRow < networks.length; curRow++) {
+            for (int caseNum = 0; caseNum < miniBatchSize; caseNum++) {
+
+                NeuralNetwork currentNetwork = networks[curRow][caseNum];
+                Matrix currentExpectedOutput = expecteds[curRow][caseNum];
+
+                // Get predictions
+                int predictedOutput = getPredictedOutput(currentNetwork.layers[2].activationValues);
+                int expectedIntegerOutput = getIntOfHotValue(currentExpectedOutput);
+
+                // Display cur image
+                displayImageWithResult(currentNetwork.layers[0].activationValues, predictedOutput, expectedIntegerOutput);
+
+                System.out.println("Press 1 to continue to the next image, or any other key to return to the main menu:");
+
+                String input = scanner.nextLine().trim();
+
+                // If the user does not input "1", return to the main menu
+                if (!input.equals("1")) {
+                    return; 
+                }
+            }
+        }
     }
 
-    public static void showMisclassifiedImages() {
-        System.out.println("showing all the misclassified images");
+    public static void showMisclassifiedImages(NeuralNetwork[][] networks, Matrix[][] expecteds) {
+
+        for (int curRow = 0; curRow < networks.length; curRow++) {
+            for (int caseNum = 0; caseNum < miniBatchSize; caseNum++) {
+
+                NeuralNetwork currentNetwork = networks[curRow][caseNum];
+                Matrix currentExpectedOutput = expecteds[curRow][caseNum];
+
+                int predictedOutput = getPredictedOutput(currentNetwork.layers[2].activationValues);
+                int expectedIntegerOutput = getIntOfHotValue(currentExpectedOutput);
+
+                // Only show misclassified images 
+                if (predictedOutput != expectedIntegerOutput) {
+                    displayImageWithResult(currentNetwork.layers[0].activationValues, predictedOutput, expectedIntegerOutput);
+
+                    // Ask the user if they want to continue to the next image
+                    System.out.println("Press 1 to continue to the next image, or any other key to return to the main menu:");
+                    String input = scanner.nextLine().trim();
+
+                    // If the user does not input "1", return to the main menu
+                    if (!input.equals("1")) {
+                        return; 
+                    }
+                }
+            }
+        }
+    }
+
+    public static void displayImageWithResult(Matrix image, int predictedLabel, int correctLabel) {
+        // Convert to visual
+        System.out.println("Image:");
+        displayImage(image);
+        
+        // Display the labels
+        System.out.println("Correct Label: " + correctLabel);
+        System.out.println("Predicted Label: " + predictedLabel);
+        if (predictedLabel == correctLabel) {
+            System.out.println("Classification: Correct");
+        } else {
+            System.out.println("Classification: Incorrect");
+        }
+    }
+
+    public static void displayImage(Matrix image) {
+
+        int count = 0;
+
+        for (int i = 0; i < image.rowSize; i++) {
+            for (int j = 0; j < image.columnSize; j++) {
+                
+                if (count % 28 == 0){
+                    System.out.println();
+                }
+                
+
+                double pixelValue = image.grid[i][j];
+                char pixelChar = getCharForPixel(pixelValue);
+                System.out.print(pixelChar + " ");
+
+                count++;
+            }
+        }
+        System.out.println();
+    }
+
+
+    public static char getCharForPixel(double pixelValue) {
+
+        double resized = (pixelValue * 255.0);;
+
+        if (resized == 0){
+            return ' ';
+        }
+        else if (resized > 0 && resized <= 90){
+            return '.';
+        }
+        else if (resized > 90 && resized <= 188){
+            return '+';
+        }
+        else{ 
+            return '#';
+        }
     }
 
     // returns the oneHotValue of the integer that represents the expected output
@@ -568,15 +668,6 @@ class Main {
         updateUsingGradients(learningRate, miniBatch.length, layer1weights.grid, layer1WeightGradients);
         updateUsingGradients(learningRate, miniBatch.length, layer2biases.grid, layer2BiasGradients);
         updateUsingGradients(learningRate, miniBatch.length, layer1biases.grid, layer1BiasGradients);
-    }
-
-    // this function sets up the ranges for what char a grey scale value should represent
-    private static void fillPixelsMap() {
-        // possible "densities" of pixel values 0-62 to small to show 63-125 low density 126-189 medium density > 189 high density
-        pixelsMap.put(0, ' ');
-        pixelsMap.put(63, '.');
-        pixelsMap.put(126, '+');
-        pixelsMap.put(189, '#');
     }
 
 }
