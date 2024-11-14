@@ -1,3 +1,10 @@
+/*
+Name: Nathan Gremillion
+Class: AI
+Project: Neural Network that recognized numbers using their grey scale values
+Date: 10/22/2024
+ */
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -14,7 +21,7 @@ class Main {
     static final Scanner scanner = new Scanner(System.in);
     static double learningRate = 1;
     static int totalLayers = 3;
-    static int totalEpochs = 30;
+    static int totalEpochs = 60;
     static int miniBatchSize = 10;
     static int inputLinesSize = 785;
     static int totalDataPoints;
