@@ -1,6 +1,12 @@
 # Neural_Network
 This is a ai that is made in java that can recognize the numbers 1-9
 
+Setup
+- unzip the mnist_train.zip 
+- move all csv files from resulting folder into the same directory as the other .java files
+- javac Main.java
+- java Main
+
 Enter a valid number 1-8 as a command:
 1 - Train the network (trains a csv filled with greyscale data)
 2 - Load pre-trained network (loads in pretrained weights and biases if they are there have to use option 7 to save)
